@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
+import org.joml.Matrix4f;
 import org.joml.Vector3dc;
 import org.vivecraft.api.client.data.RenderPass;
 import org.vivecraft.client.extensions.LevelRenderStateExtension;
@@ -65,7 +65,7 @@ public final class GogglesOverlay {
         poseStack.pushPose();
         poseStack.translate(lens.x() - cameraPos.x, lens.y() - cameraPos.y, lens.z() - cameraPos.z);
         if (VrFpv.goggles()) {
-            poseStack.mulPose(new Quaternionf(VrFpv.camera()));
+            poseStack.mulPose(new Matrix4f().rotation(VrFpv.camera()));
             float halfWidth = SCREEN_DISTANCE * GogglesMath.halfWidthAtUnit(VrFpv.cameraFov());
             float halfHeight = halfWidth / VrFpv.imageAspect();
             if (config.gogglesFrame) {
@@ -76,7 +76,7 @@ public final class GogglesOverlay {
                 order = hud(output, poseStack, SCREEN_DISTANCE, 2.0F * halfHeight, order);
             }
         } else if (hud) {
-            poseStack.mulPose(new Quaternionf(VrFpv.headView()));
+            poseStack.mulPose(new Matrix4f().rotation(VrFpv.headView()));
             float width = 2.0F * HUD_DISTANCE * (float) Math.tan(Math.toRadians(config.screenSizeDegrees) * 0.5);
             RenderTarget gui = GuiHandler.GUI_FRAMEBUFFER;
             order = hud(output, poseStack, HUD_DISTANCE, width * gui.height / (float) gui.width, order);
