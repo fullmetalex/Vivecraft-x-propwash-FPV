@@ -1,0 +1,95 @@
+plugins {
+    id 'java-library'
+}
+
+base {
+    archivesName = "${mod_id}-${project.name}-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Propwash FPV and Vivecraft are compiled against from the jars in libs/ (scripts/fetch-deps.py puts them there:
+// Vivecraft from Modrinth, Propwash FPV from Modrinth or built from its source). One loader variant is enough: Minecraft
+// 26.3 is unobfuscated and both mods carry the same common code in their Fabric and NeoForge jars.
+def requiredModJars = rootProject.fileTree('libs') { include '*.jar' }
+
+dependencies {
+    compileOnly(requiredModJars)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    doFirst {
+        if (requiredModJars.isEmpty()) {
+            throw new GradleException('libs/ holds no Propwash FPV and Vivecraft jars: run `python3 scripts/fetch-deps.py` first (see README)')
+        }
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    from(rootProject.files('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'   : mod_name,
+                'Specification-Vendor'  : mod_author,
+                'Specification-Version' : project.jar.archiveVersion,
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': project.jar.archiveVersion,
+                'Implementation-Vendor' : mod_author,
+                'Built-On-Minecraft'    : minecraft_version
+        ])
+    }
+}
+
+processResources {
+    var expandProps = [
+            'version'                      : version,
+            'group'                        : project.group,
+            'minecraft_version'            : minecraft_version,
+            'minecraft_version_range'      : minecraft_version_range,
+            'fabric_version'               : fabric_version,
+            'fabric_loader_version'        : fabric_loader_version,
+            'mod_name'                     : mod_name,
+            'mod_author'                   : mod_author,
+            'mod_id'                       : mod_id,
+            'license'                      : license,
+            'description'                  : project.description,
+            'neoforge_version'             : neoforge_version,
+            'neoforge_loader_version_range': neoforge_loader_version_range,
+            'credits'                      : credits,
+            'homepage_url'                 : homepage_url,
+            'java_version'                 : java_version,
+            'propwash_version'             : propwash_version,
+            'propwash_version_range'       : propwash_version_range,
+            'vivecraft_version_range'      : vivecraft_version_range
+    ]
+
+    var jsonExpandProps = expandProps.collectEntries {
+        key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
+    }
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand expandProps
+    }
+
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', '*.mixins.json']) {
+        expand jsonExpandProps
+    }
+
+    inputs.properties(expandProps)
+}

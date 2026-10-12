@@ -1,0 +1,29 @@
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea/*
+
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# gradle
+/build/
+/*/build/
+/build-logic/build/
+.gradle
+
+# runs
+run
+runs/
+**/runs/
+*.log
+
+# local dependency jars (see README)
+/libs/*.jar
