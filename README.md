@@ -93,16 +93,15 @@ Le mod est uniquement client : inutile de l'installer sur le serveur.
 ## Compiler
 
 ```sh
+python3 scripts/fetch-deps.py   # met Propwash FPV et Vivecraft (26.3) dans libs/
 ./gradlew build
 ```
 
-Il faut Java 25 (Gradle le télécharge via la toolchain si besoin). Les jars sortent dans `fabric/build/libs` et
-`neoforge/build/libs`. Le workflow GitHub Actions `Build` fait la même chose à chaque push et publie les jars en
-artefact.
-
-Propwash FPV et Vivecraft viennent du Maven de Modrinth (`gradle.properties` : `propwash_version`,
-`vivecraft_version`). Si une coordonnée ne se résout pas (numéro de version différent sur Modrinth), déposez
-simplement les deux jars dans `libs/` : ils sont alors utilisés à la place.
+Il faut Java 25 (Gradle le télécharge via la toolchain si besoin) et git. Le script prend Vivecraft sur Modrinth et
+Propwash FPV sur Modrinth s'il y est publié, sinon il le compile depuis son dépôt au tag `v0.5.0`
+(`PROPWASH_TAG=... python3 scripts/fetch-deps.py --force` pour une autre version). On peut aussi déposer les deux jars
+à la main dans `libs/`. Les jars du mod sortent dans `fabric/build/libs` et `neoforge/build/libs`. Le workflow GitHub
+Actions `Build` fait la même chose à chaque push et publie les jars en artefact.
 
 ## Comment ça marche
 
@@ -147,8 +146,8 @@ in VR with [Vivecraft](https://github.com/Vivecraft/VivecraftMod) (Minecraft 26.
 - Settings in `config/propwash_vr.json`; three unbound key mappings (view mode, re-center, FPV in headset on/off),
   also bindable to controller buttons through Vivecraft's "Mod" action set.
 
-Build with `./gradlew build` (Java 25). Dependencies come from the Modrinth Maven; if a coordinate does not resolve,
-put the Propwash FPV and Vivecraft jars into `libs/`. Status: written against the Propwash FPV 0.5.0 and Vivecraft
+Build with `python3 scripts/fetch-deps.py && ./gradlew build` (Java 25, git): the script puts Vivecraft (Modrinth)
+and Propwash FPV (Modrinth, or built from its source at `v0.5.0`) into `libs/`. Status: written against the Propwash FPV 0.5.0 and Vivecraft
 `Multiloader-26.3` sources, math covered by unit tests, not yet tested in game with a headset.
 
 MIT License. Propwash FPV is by lardtom, Vivecraft by the Vivecraft team; this mod only links against them.

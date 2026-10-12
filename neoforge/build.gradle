@@ -20,15 +20,3 @@ neoForge {
         }
     }
 }
-
-dependencies {
-    // Propwash FPV and Vivecraft in the dev client (runClient).
-    if (rootProject.fileTree('libs') { include '*.jar' }.isEmpty()) {
-        runtimeOnly(propwashCoordinate) {
-            transitive = false
-        }
-        runtimeOnly(vivecraftCoordinate) {
-            transitive = false
-        }
-    }
-}

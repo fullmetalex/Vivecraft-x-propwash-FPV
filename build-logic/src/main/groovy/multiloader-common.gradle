@@ -16,38 +16,23 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 repositories {
-    // Propwash FPV and Vivecraft are published on Modrinth.
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = 'Modrinth'
-                url = uri('https://api.modrinth.com/maven')
-            }
-        }
-        filter {
-            includeGroup('maven.modrinth')
-        }
-    }
     mavenCentral()
 }
 
-// Loader variant of the required mods on the compile classpath: common and neoforge use the NeoForge jars, fabric the
-// Fabric jars. Minecraft 26.3 is unobfuscated, so both carry the same Mojang names.
-def requiredModsLoader = project.name == 'fabric' ? 'fabric' : 'neoforge'
-ext.propwashCoordinate = "maven.modrinth:propwash-fpv:${propwash_version}+${requiredModsLoader}"
-ext.vivecraftCoordinate = "maven.modrinth:vivecraft:${vivecraft_version}-${requiredModsLoader}"
+// Propwash FPV and Vivecraft are compiled against from the jars in libs/ (scripts/fetch-deps.py puts them there:
+// Vivecraft from Modrinth, Propwash FPV from Modrinth or built from its source). One loader variant is enough: Minecraft
+// 26.3 is unobfuscated and both mods carry the same common code in their Fabric and NeoForge jars.
+def requiredModJars = rootProject.fileTree('libs') { include '*.jar' }
 
 dependencies {
-    def localJars = rootProject.fileTree('libs') { include '*.jar' }
-    if (localJars.isEmpty()) {
-        compileOnly(propwashCoordinate) {
-            transitive = false
+    compileOnly(requiredModJars)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    doFirst {
+        if (requiredModJars.isEmpty()) {
+            throw new GradleException('libs/ holds no Propwash FPV and Vivecraft jars: run `python3 scripts/fetch-deps.py` first (see README)')
         }
-        compileOnly(vivecraftCoordinate) {
-            transitive = false
-        }
-    } else {
-        compileOnly(localJars)
     }
 }
 
