@@ -1,0 +1,12 @@
+{
+  "key.category.propwash_vr.main": "Propwash VR",
+  "key.propwash_vr.fpv_in_headset": "FPV in der VR-Brille an/aus",
+  "key.propwash_vr.recenter": "Immersive Ansicht neu ausrichten",
+  "key.propwash_vr.view_mode": "Brillen- / immersive Ansicht wechseln",
+  "propwash_vr.message.fpv_off": "Propwash VR: FPV in der VR-Brille aus",
+  "propwash_vr.message.fpv_on": "Propwash VR: FPV in der VR-Brille an",
+  "propwash_vr.message.recentered": "Propwash VR: Ansicht neu ausgerichtet",
+  "propwash_vr.message.view_mode": "Propwash VR: Ansicht %s",
+  "propwash_vr.view_mode.goggles": "Brille",
+  "propwash_vr.view_mode.immersive": "immersiv"
+}

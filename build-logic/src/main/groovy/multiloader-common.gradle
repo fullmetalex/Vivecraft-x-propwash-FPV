@@ -1,0 +1,110 @@
+plugins {
+    id 'java-library'
+}
+
+base {
+    archivesName = "${mod_id}-${project.name}-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    // Propwash FPV and Vivecraft are published on Modrinth.
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = uri('https://api.modrinth.com/maven')
+            }
+        }
+        filter {
+            includeGroup('maven.modrinth')
+        }
+    }
+    mavenCentral()
+}
+
+// Loader variant of the required mods on the compile classpath: common and neoforge use the NeoForge jars, fabric the
+// Fabric jars. Minecraft 26.3 is unobfuscated, so both carry the same Mojang names.
+def requiredModsLoader = project.name == 'fabric' ? 'fabric' : 'neoforge'
+ext.propwashCoordinate = "maven.modrinth:propwash-fpv:${propwash_version}+${requiredModsLoader}"
+ext.vivecraftCoordinate = "maven.modrinth:vivecraft:${vivecraft_version}-${requiredModsLoader}"
+
+dependencies {
+    def localJars = rootProject.fileTree('libs') { include '*.jar' }
+    if (localJars.isEmpty()) {
+        compileOnly(propwashCoordinate) {
+            transitive = false
+        }
+        compileOnly(vivecraftCoordinate) {
+            transitive = false
+        }
+    } else {
+        compileOnly(localJars)
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    from(rootProject.files('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'   : mod_name,
+                'Specification-Vendor'  : mod_author,
+                'Specification-Version' : project.jar.archiveVersion,
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': project.jar.archiveVersion,
+                'Implementation-Vendor' : mod_author,
+                'Built-On-Minecraft'    : minecraft_version
+        ])
+    }
+}
+
+processResources {
+    var expandProps = [
+            'version'                      : version,
+            'group'                        : project.group,
+            'minecraft_version'            : minecraft_version,
+            'minecraft_version_range'      : minecraft_version_range,
+            'fabric_version'               : fabric_version,
+            'fabric_loader_version'        : fabric_loader_version,
+            'mod_name'                     : mod_name,
+            'mod_author'                   : mod_author,
+            'mod_id'                       : mod_id,
+            'license'                      : license,
+            'description'                  : project.description,
+            'neoforge_version'             : neoforge_version,
+            'neoforge_loader_version_range': neoforge_loader_version_range,
+            'credits'                      : credits,
+            'homepage_url'                 : homepage_url,
+            'java_version'                 : java_version,
+            'propwash_version'             : propwash_version,
+            'propwash_version_range'       : propwash_version_range,
+            'vivecraft_version_range'      : vivecraft_version_range
+    ]
+
+    var jsonExpandProps = expandProps.collectEntries {
+        key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
+    }
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand expandProps
+    }
+
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', '*.mixins.json']) {
+        expand jsonExpandProps
+    }
+
+    inputs.properties(expandProps)
+}

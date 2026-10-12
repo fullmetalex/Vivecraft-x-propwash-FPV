@@ -1,0 +1,12 @@
+{
+  "key.category.propwash_vr.main": "Propwash VR",
+  "key.propwash_vr.fpv_in_headset": "FPV dans le casque oui/non",
+  "key.propwash_vr.recenter": "Recentrer la vue immersive",
+  "key.propwash_vr.view_mode": "Basculer vue lunettes / immersive",
+  "propwash_vr.message.fpv_off": "Propwash VR : FPV dans le casque désactivé",
+  "propwash_vr.message.fpv_on": "Propwash VR : FPV dans le casque activé",
+  "propwash_vr.message.recentered": "Propwash VR : vue recentrée",
+  "propwash_vr.message.view_mode": "Propwash VR : vue %s",
+  "propwash_vr.view_mode.goggles": "lunettes",
+  "propwash_vr.view_mode.immersive": "immersive"
+}
